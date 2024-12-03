@@ -6,6 +6,7 @@ import com.example.trynewsapi.core.data.repository.BookmarkRepository
 import com.example.trynewsapi.core.data.repository.NewsRepository
 import com.example.trynewsapi.core.model.SavableArticle
 import com.example.trynewsapi.core.network.NetworkState
+import com.example.trynewsapi.core.ui.NewsFeedUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,30 +22,30 @@ class TopHeadlinesViewModel @Inject constructor(
     private val newsRepository: NewsRepository
 ) : ViewModel() {
 
-    private val combinedData: Flow<TopHeadlinesUiState> =
+    private val combinedData: Flow<NewsFeedUiState> =
         combine(
             newsRepository.newsStream,
             bookmarkRepository.bookmarksStreams
         ) { networkState, bookmarks ->
             when (networkState) {
-                is NetworkState.Loading -> TopHeadlinesUiState.Loading
+                is NetworkState.Loading -> NewsFeedUiState.Loading
                 is NetworkState.Success -> {
                     val savableArticle = networkState.data.map { article ->
                         val isBookmarked = bookmarks.contains(article.title)
                         SavableArticle(article, isBookmarked)
                     }
-                    TopHeadlinesUiState.Success(savableArticle)
+                    NewsFeedUiState.Success(savableArticle)
                 }
 
-                is NetworkState.Error -> TopHeadlinesUiState.Error(networkState.exception.localizedMessage.orEmpty())
+                is NetworkState.Error -> NewsFeedUiState.Error(networkState.exception.localizedMessage.orEmpty())
             }
         }
 
-    val uiState: StateFlow<TopHeadlinesUiState> =
+    val uiState: StateFlow<NewsFeedUiState> =
         combinedData
             .stateIn(
                 scope = viewModelScope,
-                initialValue = TopHeadlinesUiState.Loading,
+                initialValue = NewsFeedUiState.Loading,
                 started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000)
             )
 
