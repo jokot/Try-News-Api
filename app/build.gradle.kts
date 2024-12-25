@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,6 +9,16 @@ plugins {
     id(libs.plugins.hilt.get().pluginId)
     id(libs.plugins.ksp.get().pluginId)
 }
+
+val properties = Properties().apply {
+    val file = File(rootDir, "local.properteis")
+    if (file.exists()) {
+        load(file.inputStream())
+    }
+}
+
+val accessTokenKey = "ACCESS_TOKEN"
+val accessToken: String = properties.getProperty(accessTokenKey).orEmpty()
 
 android {
     namespace = "com.example.trynewsapi"
@@ -20,6 +32,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", accessTokenKey, "\"$accessToken\"")
     }
 
     buildTypes {
@@ -40,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
