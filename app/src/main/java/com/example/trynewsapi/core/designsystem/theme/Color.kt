@@ -1,4 +1,4 @@
-package com.example.trynewsapi.ui.theme
+package com.example.trynewsapi.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
