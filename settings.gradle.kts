@@ -19,5 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Try News Api"
+rootProject.name = "TryNewsApi"
 include(":app")
+ 

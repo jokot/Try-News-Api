@@ -1,4 +1,4 @@
-package com.example.trynewsapi.core.designsystem.theme
+package com.example.trynewsapi.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
