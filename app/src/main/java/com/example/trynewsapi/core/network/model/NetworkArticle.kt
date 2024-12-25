@@ -1,5 +1,6 @@
 package com.example.trynewsapi.core.network.model
 
+import com.example.trynewsapi.core.model.Article
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -29,5 +30,17 @@ data class NetworkArticle(
         val id: String? = null,
         @SerialName("name")
         val name: String? = null
+    )
+
+    fun toDomain() = Article(
+        sourceId = source?.id.orEmpty(),
+        sourceName = source?.name.orEmpty(),
+        author = author.orEmpty(),
+        content = content.orEmpty(),
+        description = description.orEmpty(),
+        publishedAt = publishedAt.orEmpty(),
+        title = title.orEmpty(),
+        url = url.orEmpty(),
+        urlToImage = urlToImage.orEmpty()
     )
 }
