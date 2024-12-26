@@ -6,13 +6,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trynewsapi.core.model.SavableSource
 import com.example.trynewsapi.core.ui.EmptyState
 import com.example.trynewsapi.core.ui.ErrorState
+import com.example.trynewsapi.core.ui.FollowingSourcesBottomSheet
 import com.example.trynewsapi.core.ui.LoadingState
 import com.example.trynewsapi.core.ui.NewsItem
 import com.example.trynewsapi.core.ui.SourcesSection
@@ -38,15 +45,22 @@ fun HeadlinesScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HeadlinesScreen(
     modifier: Modifier = Modifier,
     uiState: HeadlinesUiState,
     onToggleFollowSource: (SavableSource) -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    var showBottomSheet by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier
     ) { innerPadding ->
+
         Box(
             modifier = Modifier
                 .padding(innerPadding)
@@ -70,18 +84,10 @@ fun HeadlinesScreen(
                     LazyColumn(
                         modifier = modifier.fillMaxSize()
                     ) {
-                        item {
-                            SourcesSection(
-                                savableSources = uiState.previewSources,
-                                onSeeAllClick = {},
-                                onSourceFollowedChanged = onToggleFollowSource
-                            )
-                        }
 
-                        // All News Section Header
                         item {
                             Text(
-                                text = "All News",
+                                text = "Top Headlines",
                                 style = MaterialTheme.typography.headlineLarge,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -89,9 +95,20 @@ fun HeadlinesScreen(
                             )
                         }
 
-                        // All News Items
+                        item {
+                            SourcesSection(
+                                savableSources = uiState.previewSources,
+                                onSeeAllClick = {
+                                    showBottomSheet = true
+                                },
+                                onSourceFollowedChanged = onToggleFollowSource
+                            )
+                        }
+
                         items(uiState.news) { article ->
-                            NewsItem(article = article) {}
+                            NewsItem(article = article) {
+
+                            }
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
@@ -99,6 +116,20 @@ fun HeadlinesScreen(
                         }
                     }
                 }
+            }
+        }
+
+        if (uiState is HeadlinesUiState.Success && showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState,
+            ) {
+                FollowingSourcesBottomSheet(
+                    sources = uiState.sources,
+                    onFollowToggle = onToggleFollowSource
+                )
             }
         }
     }

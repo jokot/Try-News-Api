@@ -24,11 +24,10 @@ fun SourcesSection(
     onSourceFollowedChanged: (SavableSource) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Header Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -41,7 +40,6 @@ fun SourcesSection(
             }
         }
 
-        // Horizontal Scrollable Chips
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

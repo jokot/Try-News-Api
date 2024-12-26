@@ -8,9 +8,11 @@ import com.example.trynewsapi.core.network.ApiResult
 import com.example.trynewsapi.core.network.NetworkDataSource
 import com.example.trynewsapi.core.network.model.NetworkArticle
 import com.example.trynewsapi.core.network.model.NetworkSource
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -29,6 +31,7 @@ interface NewsRepository {
     suspend fun toggleFollowing(sourceId: String, isFollowing: Boolean)
 }
 
+@OptIn(FlowPreview::class)
 class NewsRepositoryImpl @Inject constructor(
     private val networkDataSource: NetworkDataSource,
     private val localDataSource: LocalDataSource
@@ -62,11 +65,12 @@ class NewsRepositoryImpl @Inject constructor(
                     data = result.data.articles?.map(NetworkArticle::toDomain).orEmpty()
                 )
             }
-        }.catch { e ->
-            emit(DataState.Error(e.localizedMessage.orEmpty()))
-        }.collect { dataState ->
-            emit(dataState)
-        }
+        }.debounce(500L)
+            .catch { e ->
+                emit(DataState.Error(e.localizedMessage.orEmpty()))
+            }.collect { dataState ->
+                emit(dataState)
+            }
     }
 
     override fun getSources(): Flow<DataState<List<SavableSource>>> = combine(
