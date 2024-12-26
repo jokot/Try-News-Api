@@ -5,5 +5,5 @@ import com.example.trynewsapi.core.data.repository.NewsRepository
 class GetSources(
     private val newsRepository: NewsRepository
 ) {
-    operator fun invoke() = newsRepository.getNews()
+    operator fun invoke() = newsRepository.getSources()
 }

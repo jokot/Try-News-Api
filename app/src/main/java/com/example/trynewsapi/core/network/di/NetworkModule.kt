@@ -30,7 +30,7 @@ object NetworkDependenciesModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpCallFactory(): OkHttpClient =
+    fun provideOkHttpCallFactory(): Call.Factory =
         OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()

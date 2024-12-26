@@ -7,26 +7,40 @@ import retrofit2.Response
 import javax.inject.Inject
 
 interface NetworkDataSource {
-    suspend fun getNews(): ApiResult<ArticlesResponse>
-    suspend fun getFollowingNews(sources: String): ApiResult<ArticlesResponse>
+    suspend fun getNews(
+        q: String,
+        page: Int,
+        pageSize: Int,
+        sources: String
+    ): ApiResult<ArticlesResponse>
+
     suspend fun getSources(): ApiResult<SourcesResponse>
-    suspend fun getHeadlines(pageSize: Int): ApiResult<ArticlesResponse>
+    suspend fun getHeadlines(sources: String): ApiResult<ArticlesResponse>
 }
 
 class NetworkDataSourceImpl @Inject constructor(
     private val apiService: ApiService
 ) : NetworkDataSource {
-    override suspend fun getNews(): ApiResult<ArticlesResponse> =
-        apiCall { apiService.getNews() }
-
-    override suspend fun getFollowingNews(sources: String): ApiResult<ArticlesResponse> =
-        apiCall { apiService.getNews(sources = sources) }
+    override suspend fun getNews(
+        q: String,
+        page: Int,
+        pageSize: Int,
+        sources: String
+    ): ApiResult<ArticlesResponse> =
+        apiCall {
+            apiService.searchNews(
+                q = q,
+                page = page,
+                pageSize = pageSize,
+                sources = sources
+            )
+        }
 
     override suspend fun getSources(): ApiResult<SourcesResponse> =
         apiCall { apiService.getSources() }
 
-    override suspend fun getHeadlines(pageSize: Int): ApiResult<ArticlesResponse> =
-        apiCall { apiService.getHeadlines(pageSize = pageSize) }
+    override suspend fun getHeadlines(sources: String): ApiResult<ArticlesResponse> =
+        apiCall { apiService.getHeadlines(sources = sources) }
 }
 
 suspend fun <T> apiCall(

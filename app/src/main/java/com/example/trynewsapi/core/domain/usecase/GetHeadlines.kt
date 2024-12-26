@@ -5,9 +5,5 @@ import com.example.trynewsapi.core.data.repository.NewsRepository
 class GetHeadlines(
     private val newsRepository: NewsRepository
 ) {
-    operator fun invoke() = newsRepository.getHeadlines(PAGE_SIZE)
-
-    private companion object {
-        private const val PAGE_SIZE = 20
-    }
+    operator fun invoke() = newsRepository.getHeadlines()
 }

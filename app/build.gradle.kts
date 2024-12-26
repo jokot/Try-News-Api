@@ -11,7 +11,7 @@ plugins {
 }
 
 val properties = Properties().apply {
-    val file = File(rootDir, "local.properteis")
+    val file = File(rootDir, "local.properties")
     if (file.exists()) {
         load(file.inputStream())
     }

@@ -6,16 +6,17 @@ import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 interface LocalDataSource {
-    suspend fun getFollowingSources(): Flow<Set<String>>
+    fun getFollowingSources(): Flow<Set<String>>
     suspend fun toggleFollowing(sourceId: String, isFollowing: Boolean)
 }
 
-class LocalDataSourceImpl(
+class LocalDataSourceImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : LocalDataSource {
-    override suspend fun getFollowingSources(): Flow<Set<String>> =
+    override fun getFollowingSources(): Flow<Set<String>> =
         dataStore.data.map { preferences ->
             preferences[DatastoreKey.FOLLOWINGS].orEmpty()
         }.distinctUntilChanged()

@@ -9,15 +9,17 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("v2/everything")
-    suspend fun getNews(
-        @Query("language") language: String = "en",
-        @Query("sources") sources: String? = null
+    suspend fun searchNews(
+        @Query("q") q: String,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int = 20,
+        @Query("sources") sources: String? = null,
     ): Response<ArticlesResponse>
 
     @GET("v2/top-headlines")
     suspend fun getHeadlines(
         @Query("language") language: String = "en",
-        @Query("pageSize") pageSize: Int
+        @Query("sources") sources: String? = null
     ): Response<ArticlesResponse>
 
     @GET("v2/top-headlines/sources")
