@@ -58,15 +58,14 @@ class NewsRepositoryImpl @Inject constructor(
 
     override fun getHeadlines(): Flow<DataState<List<Article>>> = flow {
         emit(DataState.Loading)
-        localDataSource.getFollowingSources().map { followings ->
+        localDataSource.getFollowingSources().debounce(500L).map { followings ->
             when (val result = networkDataSource.getHeadlines(followings.joinToString(","))) {
                 is ApiResult.Error -> DataState.Error(result.message)
                 is ApiResult.Success -> DataState.Success(
                     data = result.data.articles?.map(NetworkArticle::toDomain).orEmpty()
                 )
             }
-        }.debounce(500L)
-            .catch { e ->
+        }.catch { e ->
                 emit(DataState.Error(e.localizedMessage.orEmpty()))
             }.collect { dataState ->
                 emit(dataState)
