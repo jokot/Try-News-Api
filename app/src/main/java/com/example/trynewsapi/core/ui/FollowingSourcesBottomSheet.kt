@@ -11,8 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.trynewsapi.R
 import com.example.trynewsapi.core.model.SavableSource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -27,7 +29,7 @@ fun FollowingSourcesBottomSheet(
             .padding(16.dp)
     ) {
         Text(
-            text = "Following Sources",
+            text = stringResource(R.string.source_following_title),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
         )
 

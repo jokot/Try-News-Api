@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">TryNewsApi</string>
+
+    <string name="headlines_label">News</string>
+    <string name="headlines_title">Top Headlines</string>
+
+    <string name="search_label">Search</string>
+    <string name="search_title">Search News</string>
+
+    <string name="source_label">Source</string>
+    <string name="source_title">Source</string>
+    <string name="source_following_title">Following Sources</string>
+
+    <string name="empty_message">No News Found</string>
+    <string name="error_title">Something Went Wrong</string>
 </resources>
