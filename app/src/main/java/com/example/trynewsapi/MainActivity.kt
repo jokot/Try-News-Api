@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.trynewsapi.core.designsystem.theme.TryNewsApiTheme
-import com.example.trynewsapi.feature.headlines.HeadlinesScreen
+import com.example.trynewsapi.ui.NewsApp
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TryNewsApiTheme {
-                HeadlinesScreen()
+                NewsApp()
             }
         }
     }

@@ -21,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.trynewsapi.R
 import com.example.trynewsapi.core.model.SavableSource
 import com.example.trynewsapi.core.ui.EmptyState
 import com.example.trynewsapi.core.ui.ErrorState
@@ -33,7 +35,7 @@ import com.example.trynewsapi.core.ui.SourcesSection
 
 @Composable
 fun HeadlinesScreen(
-    viewModel: HeadlinesViewModel = viewModel(),
+    viewModel: HeadlinesViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -87,7 +89,7 @@ fun HeadlinesScreen(
 
                         item {
                             Text(
-                                text = "Top Headlines",
+                                text = stringResource(R.string.headlines_title),
                                 style = MaterialTheme.typography.headlineLarge,
                                 modifier = Modifier
                                     .fillMaxWidth()
