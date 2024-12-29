@@ -4,6 +4,7 @@ import com.example.trynewsapi.core.data.state.DataState
 import com.example.trynewsapi.core.datastore.LocalDataSource
 import com.example.trynewsapi.core.model.Article
 import com.example.trynewsapi.core.model.SavableSource
+import com.example.trynewsapi.core.model.Source
 import com.example.trynewsapi.core.network.ApiResult
 import com.example.trynewsapi.core.network.NetworkDataSource
 import com.example.trynewsapi.core.network.model.NetworkArticle
@@ -27,7 +28,8 @@ interface NewsRepository {
     ): Flow<DataState<List<Article>>>
 
     fun getHeadlines(): Flow<DataState<List<Article>>>
-    fun getSources(): Flow<DataState<List<SavableSource>>>
+    fun getSavableSources(): Flow<DataState<List<SavableSource>>>
+    fun getSources(): Flow<DataState<List<Source>>>
     suspend fun toggleFollowing(sourceId: String, isFollowing: Boolean)
 }
 
@@ -72,7 +74,7 @@ class NewsRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getSources(): Flow<DataState<List<SavableSource>>> = combine(
+    override fun getSavableSources(): Flow<DataState<List<SavableSource>>> = combine(
         flow { emit(networkDataSource.getSources()) },
         localDataSource.getFollowingSources()
     ) { apiResult, following ->
@@ -94,6 +96,19 @@ class NewsRepositoryImpl @Inject constructor(
         emit(DataState.Error(e.localizedMessage.orEmpty()))
     }
 
+    override fun getSources(): Flow<DataState<List<Source>>> = flow {
+        emit(DataState.Loading)
+        emit(
+            when (val result = networkDataSource.getSources()) {
+                is ApiResult.Error -> DataState.Error(result.message)
+                is ApiResult.Success -> DataState.Success(
+                    data = result.data.sources?.map(NetworkSource::toDomain).orEmpty()
+                )
+            }
+        )
+    }.catch { e ->
+        DataState.Error(e.localizedMessage.orEmpty())
+    }
 
     override suspend fun toggleFollowing(sourceId: String, isFollowing: Boolean) {
         localDataSource.toggleFollowing(sourceId, isFollowing)
