@@ -1,33 +1,36 @@
 package com.example.trynewsapi.core.datastore
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences.pb")
+interface LocalDataSource {
+    fun getFollowingSources(): Flow<Set<String>>
+    suspend fun toggleFollowing(sourceId: String, isFollowing: Boolean)
+}
 
-class LocalDataSource @Inject constructor(
+class LocalDataSourceImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
-) {
-    val bookmarksStreams: Flow<List<String>> = dataStore.data.map {
-        it[PreferencesKeys.BOOKMARKS]?.toList().orEmpty()
-    }
+) : LocalDataSource {
+    override fun getFollowingSources(): Flow<Set<String>> =
+        dataStore.data.map { preferences ->
+            preferences[DatastoreKey.FOLLOWINGS].orEmpty()
+        }.distinctUntilChanged()
 
-    suspend fun toggleBookmark(articleTitle: String, isBookmarked: Boolean) {
-        dataStore.edit {
-            val currentValue = it[PreferencesKeys.BOOKMARKS]?.toMutableSet().orEmpty()
-            val newValue = mutableSetOf<String>()
-            if (isBookmarked) {
-                newValue.addAll(currentValue.plus(articleTitle))
+    override suspend fun toggleFollowing(sourceId: String, isFollowing: Boolean) {
+        dataStore.edit { preferences ->
+            val followings = preferences[DatastoreKey.FOLLOWINGS]?.toMutableSet() ?: mutableSetOf()
+            if (isFollowing) {
+                followings.add(sourceId)
             } else {
-                newValue.addAll(currentValue.minus(articleTitle))
+                followings.remove(sourceId)
             }
-            it[PreferencesKeys.BOOKMARKS] = newValue
+
+            preferences[DatastoreKey.FOLLOWINGS] = followings
         }
     }
 }

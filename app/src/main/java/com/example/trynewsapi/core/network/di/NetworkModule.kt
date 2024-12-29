@@ -1,8 +1,10 @@
 package com.example.trynewsapi.core.network.di
 
-import androidx.compose.ui.util.trace
-import com.example.trynewsapi.core.network.TNA_BASE_URL
-import com.example.trynewsapi.core.network.service.NetworkApiService
+import com.example.trynewsapi.BuildConfig
+import com.example.trynewsapi.core.network.NetworkDataSource
+import com.example.trynewsapi.core.network.NetworkDataSourceImpl
+import com.example.trynewsapi.core.network.service.ApiService
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,49 +20,66 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal object NetworkModule {
+object NetworkDependenciesModule {
 
     @Provides
     @Singleton
-    fun provideNetworkJson(): Json = Json {
+    fun provideJson(): Json = Json {
         ignoreUnknownKeys = true
     }
 
     @Provides
     @Singleton
-    fun okHttpCallFactory(): Call.Factory = trace("TnaOkHttpClient") {
+    fun provideOkHttpCallFactory(): Call.Factory =
         OkHttpClient.Builder()
-            .addInterceptor(
-                HttpLoggingInterceptor()
-                    .apply {
-                        setLevel(HttpLoggingInterceptor.Level.BODY)
-                    }
-            )
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("X-Api-Key", BuildConfig.ACCESS_TOKEN)
+                    .build()
+                chain.proceed(request)
+            }
+            .apply {
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(
+                        HttpLoggingInterceptor().apply {
+                            setLevel(HttpLoggingInterceptor.Level.BODY)
+                        }
+
+                    )
+                }
+            }
             .build()
-    }
 
     @Provides
     @Singleton
     fun provideRetrofit(
-        networkJson: Json,
-        okHttpCallFactory: dagger.Lazy<Call.Factory>,
-    ): Retrofit = trace("RetrofitTnaNetwork") {
+        jsonConverter: Json,
+        okHttpCallFactory: dagger.Lazy<Call.Factory>
+    ): Retrofit =
         Retrofit.Builder()
-            .baseUrl(TNA_BASE_URL)
-            .callFactory {
-                okHttpCallFactory.get().newCall(it)
+            .baseUrl("https://newsapi.org/")
+            .callFactory { request ->
+                okHttpCallFactory.get().newCall(request)
             }
             .addConverterFactory(
-                networkJson.asConverterFactory("application/json".toMediaType())
+                jsonConverter.asConverterFactory("application/json".toMediaType())
             )
             .build()
-    }
 
     @Provides
     @Singleton
-    fun provideService(
+    fun provideApiService(
         retrofit: Retrofit
-    ): NetworkApiService = trace("TnaNetworkApiService") {
-        retrofit.create(NetworkApiService::class.java)
-    }
+    ): ApiService =
+        retrofit.create(ApiService::class.java)
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class NetworkModule {
+
+    @Binds
+    internal abstract fun bindNetworkDataSource(
+        networkDataSourceImpl: NetworkDataSourceImpl
+    ): NetworkDataSource
 }

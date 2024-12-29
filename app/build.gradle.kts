@@ -1,11 +1,24 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
     alias(libs.plugins.kotlin.serialization)
-    id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
+    id(libs.plugins.hilt.get().pluginId)
+    id(libs.plugins.ksp.get().pluginId)
 }
+
+val properties = Properties().apply {
+    val file = File(rootDir, "local.properties")
+    if (file.exists()) {
+        load(file.inputStream())
+    }
+}
+
+val accessTokenKey = "ACCESS_TOKEN"
+val accessToken: String = properties.getProperty(accessTokenKey).orEmpty()
 
 android {
     namespace = "com.example.trynewsapi"
@@ -19,6 +32,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", accessTokenKey, "\"$accessToken\"")
     }
 
     buildTypes {
@@ -31,18 +46,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
-    }
-    // Allow references to generated code
-    kapt {
-        correctErrorTypes = true
+        buildConfig = true
     }
 }
 
@@ -55,56 +67,46 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
 
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.adaptive)
-    implementation(libs.androidx.compose.material3.adaptive.layout)
-    implementation(libs.androidx.compose.material3.adaptive.navigation)
-    implementation(libs.androidx.compose.material3.navigationSuite)
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.androidx.hilt.navigation.compose)
-
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
-    implementation(libs.androidx.datastore.preferences)
+    //network
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.kotlin.serialization)
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.androidx.lifecycle.viewModelCompose)
+    // di
     implementation(libs.hilt.android)
-    implementation(libs.hilt.android.testing)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
+    // view model
+    implementation(libs.androidx.lifecycle.viewModelCompose)
+    // image
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    // navigation
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.browser)
+    implementation(libs.androidx.hilt.navigation.compose)
+    // icons extended
+    implementation(libs.androidx.compose.material.iconsExtended)
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
 
-    implementation(libs.androidx.test.core)
-    implementation(libs.androidx.test.espresso.core)
-    implementation(libs.androidx.test.junit.ktx)
-    implementation(libs.androidx.test.rules)
+    // unit test
+    implementation(libs.kotlinx.coroutines.test)
+    implementation(libs.hilt.android.testing)
     implementation(libs.androidx.test.runner)
-    implementation(libs.androidx.test.uiautomator)
-
-    api(libs.kotlinx.coroutines.test)
-    testImplementation(libs.junit)
-    testImplementation(libs.hilt.android.testing)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.kotlinx.serialization.json)
     testImplementation(libs.kotlin.test)
-
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.turbine)
+    testImplementation(libs.mockwebserver)
+    // ui test
+    implementation(libs.androidx.test.junit.ktx)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.hilt.android.testing)
-    androidTestImplementation(libs.kotlin.test)
-    androidTestImplementation(libs.androidx.navigation.testing)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
 
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
