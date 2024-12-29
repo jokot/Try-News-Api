@@ -30,18 +30,22 @@ class HeadlinesViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 useCases.getHeadlines(),
-                useCases.getSources()
+                useCases.getSavableSources()
             ) { newsDataState, sourcesDataState ->
                 when {
                     newsDataState is DataState.Error -> HeadlinesUiState.Error(newsDataState.message)
                     sourcesDataState is DataState.Error -> HeadlinesUiState.Error(sourcesDataState.message)
 
                     newsDataState is DataState.Success
-                            && sourcesDataState is DataState.Success -> HeadlinesUiState.Success(
-                        news = newsDataState.data,
-                        sources = sourcesDataState.data,
-                        previewSources = sourcesDataState.data.subList(0, 10)
-                    )
+                            && sourcesDataState is DataState.Success -> if (newsDataState.data.isEmpty()) {
+                        HeadlinesUiState.Empty
+                    } else {
+                        HeadlinesUiState.Success(
+                            news = newsDataState.data,
+                            sources = sourcesDataState.data,
+                            previewSources = sourcesDataState.data.subList(0, 10)
+                        )
+                    }
 
                     else -> HeadlinesUiState.Loading
                 }

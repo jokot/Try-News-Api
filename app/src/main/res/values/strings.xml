@@ -9,8 +9,14 @@
 
     <string name="source_label">Source</string>
     <string name="source_title">Source</string>
+    <string name="source_see_all">See all</string>
     <string name="source_following_title">Following Sources</string>
 
+    <string name="idle_message">Looking for something News? 👀</string>
     <string name="empty_message">No News Found</string>
     <string name="error_title">Something Went Wrong</string>
+
+    <string name="filter_source_title">Sources</string>
+    <string name="filter_reset">Reset</string>
+    <string name="filter_apply">Apply</string>
 </resources>

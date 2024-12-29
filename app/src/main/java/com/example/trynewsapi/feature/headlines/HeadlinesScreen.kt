@@ -1,6 +1,7 @@
 package com.example.trynewsapi.feature.headlines
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -59,14 +59,21 @@ fun HeadlinesScreen(
     )
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    Scaffold(
-        modifier = modifier
-    ) { innerPadding ->
+    Column(
+        modifier = modifier.fillMaxSize(),
+    ) {
+        Text(
+            text = stringResource(R.string.headlines_title),
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
 
         Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+                .weight(1f)
+                .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             when (uiState) {
@@ -83,55 +90,45 @@ fun HeadlinesScreen(
                 }
 
                 is HeadlinesUiState.Success -> {
-                    LazyColumn(
-                        modifier = modifier.fillMaxSize()
-                    ) {
+                    Column {
+                        SourcesSection(
+                            savableSources = uiState.previewSources,
+                            onSeeAllClick = {
+                                showBottomSheet = true
+                            },
+                            onSourceFollowedChanged = onToggleFollowSource
+                        )
+                        LazyColumn(
+                            modifier = modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        ) {
+                            items(uiState.news) { article ->
+                                NewsItem(article = article) {
 
-                        item {
-                            Text(
-                                text = stringResource(R.string.headlines_title),
-                                style = MaterialTheme.typography.headlineLarge,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-                        }
-
-                        item {
-                            SourcesSection(
-                                savableSources = uiState.previewSources,
-                                onSeeAllClick = {
-                                    showBottomSheet = true
-                                },
-                                onSourceFollowedChanged = onToggleFollowSource
-                            )
-                        }
-
-                        items(uiState.news) { article ->
-                            NewsItem(article = article) {
-
+                                }
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                                )
                             }
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                            )
                         }
                     }
                 }
             }
-        }
 
-        if (uiState is HeadlinesUiState.Success && showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = sheetState,
-            ) {
-                FollowingSourcesBottomSheet(
-                    sources = uiState.sources,
-                    onFollowToggle = onToggleFollowSource
-                )
+            if (uiState is HeadlinesUiState.Success && showBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        showBottomSheet = false
+                    },
+                    sheetState = sheetState,
+                ) {
+                    FollowingSourcesBottomSheet(
+                        sources = uiState.sources,
+                        onFollowToggle = onToggleFollowSource
+                    )
+                }
             }
         }
     }
